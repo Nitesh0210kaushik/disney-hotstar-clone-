@@ -1,4 +1,4 @@
-import { HomeFeed, MediaItem, UserProfile } from "../types";
+import { HomeFeed, MediaItem, UserProfile } from "@/types";
 
 export const mediaLibrary: MediaItem[] = [
   {

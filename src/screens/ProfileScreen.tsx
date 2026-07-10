@@ -1,52 +1,67 @@
-import { useState } from "react";
-import { Switch, Text, View } from "react-native";
+import { useMemo, useState } from "react";
+import { StyleSheet, Switch, Text, View } from "react-native";
 
-import { useAppTheme } from "../context/theme-context";
-import { appCopy } from "../data/copy";
-import { useProfile } from "../hooks/useProfile";
+import { useAppTheme } from "@/context/theme-context";
+import { appCopy } from "@/data/copy";
+import { useProfile } from "@/hooks/useProfile";
 
 export function ProfileScreen() {
   const { colors, isDark, toggleTheme } = useAppTheme();
   const { data: profile } = useProfile();
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
+  const styles = useMemo(
+    () =>
+      StyleSheet.create({
+        screen: {
+          backgroundColor: colors.background,
+        },
+        title: {
+          color: colors.text,
+        },
+        card: {
+          backgroundColor: colors.surface,
+        },
+        body: {
+          color: colors.text,
+        },
+        muted: {
+          color: colors.mutedText,
+        },
+      }),
+    [colors]
+  );
 
   return (
-    <View style={{ flex: 1, backgroundColor: colors.background, padding: 16, paddingTop: 56 }}>
-      <Text style={{ color: colors.text, fontSize: 28, fontWeight: "900" }}>{appCopy.profile.title}</Text>
+    <View className="flex-1 px-4 pt-14" style={styles.screen}>
+      <Text className="text-[28px] font-black" style={styles.title}>
+        {appCopy.profile.title}
+      </Text>
 
-      <View style={{ marginTop: 24, borderRadius: 24, padding: 18, backgroundColor: colors.surface }}>
-        <Text style={{ color: colors.text, fontSize: 18, fontWeight: "800" }}>
+      <View className="mt-6 rounded-[24px] p-[18px]" style={styles.card}>
+        <Text className="text-[18px] font-extrabold" style={styles.body}>
           {profile?.name ?? "Loading..."}
         </Text>
-        <Text style={{ color: colors.mutedText, marginTop: 4 }}>{profile?.email ?? ""}</Text>
+        <Text className="mt-1" style={styles.muted}>
+          {profile?.email ?? ""}
+        </Text>
       </View>
 
-      <View style={{ marginTop: 16, borderRadius: 24, padding: 18, backgroundColor: colors.surface }}>
-        <Text style={{ color: colors.text, fontWeight: "800" }}>{appCopy.profile.theme}</Text>
-        <View
-          style={{
-            marginTop: 10,
-            flexDirection: "row",
-            alignItems: "center",
-            justifyContent: "space-between",
-          }}
-        >
-          <Text style={{ color: colors.mutedText }}>Dark Mode</Text>
+      <View className="mt-4 rounded-[24px] p-[18px]" style={styles.card}>
+        <Text className="font-extrabold" style={styles.body}>
+          {appCopy.profile.theme}
+        </Text>
+        <View className="mt-2.5 flex-row items-center justify-between">
+          <Text style={styles.muted}>Dark Mode</Text>
           <Switch value={isDark} onValueChange={toggleTheme} />
         </View>
       </View>
 
-      <View style={{ marginTop: 16, borderRadius: 24, padding: 18, backgroundColor: colors.surface }}>
-        <Text style={{ color: colors.text, fontWeight: "800" }}>{appCopy.profile.notifications}</Text>
-        <View
-          style={{
-            marginTop: 10,
-            flexDirection: "row",
-            alignItems: "center",
-            justifyContent: "space-between",
-          }}
-        >
-          <Text style={{ color: colors.mutedText }}>Push notifications</Text>
+      <View className="mt-4 rounded-[24px] p-[18px]" style={styles.card}>
+        <Text className="font-extrabold" style={styles.body}>
+          {appCopy.profile.notifications}
+        </Text>
+        <View className="mt-2.5 flex-row items-center justify-between">
+          <Text style={styles.muted}>Push notifications</Text>
           <Switch value={notificationsEnabled} onValueChange={setNotificationsEnabled} />
         </View>
       </View>

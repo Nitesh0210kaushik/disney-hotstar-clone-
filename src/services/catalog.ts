@@ -1,5 +1,5 @@
-import { HomeFeed, MediaItem, UserProfile } from "../types";
-import { homeFeed, mediaLibrary, profile } from "../data/mock";
+import { HomeFeed, MediaItem, UserProfile } from "@/types";
+import { homeFeed, mediaLibrary, profile } from "@/data/mock";
 
 const delay = <T,>(value: T, ms = 600) =>
   new Promise<T>((resolve) => {

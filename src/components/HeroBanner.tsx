@@ -1,9 +1,10 @@
-import { Pressable, Text, View } from "react-native";
+import { Pressable, StyleSheet, Text, View } from "react-native";
+import { useMemo } from "react";
 import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 
-import { MediaItem } from "../types";
-import { useAppTheme } from "../context/theme-context";
+import { MediaItem } from "@/types";
+import { useAppTheme } from "@/context/theme-context";
 
 interface HeroBannerProps {
   item: MediaItem;
@@ -12,44 +13,55 @@ interface HeroBannerProps {
 
 export function HeroBanner({ item, onPrimaryPress }: HeroBannerProps) {
   const { colors } = useAppTheme();
+  const styles = useMemo(
+    () =>
+      StyleSheet.create({
+        banner: {
+          backgroundColor: colors.surface,
+        },
+        title: {
+          color: "#FFF",
+        },
+        subtitle: {
+          color: "#FFF",
+          opacity: 0.88,
+        },
+        description: {
+          color: "#E5E7EB",
+          lineHeight: 20,
+        },
+        primaryButton: {
+          backgroundColor: colors.accent,
+        },
+        primaryButtonText: {
+          color: "#FFF",
+        },
+      }),
+    [colors]
+  );
 
   return (
-    <View
-      style={{
-        borderRadius: 28,
-        overflow: "hidden",
-        backgroundColor: colors.surface,
-        marginBottom: 24,
-      }}
-    >
-      <View style={{ height: 320 }}>
-        <Image source={{ uri: item.heroImage }} style={{ width: "100%", height: "100%" }} contentFit="cover" />
+    <View className="mb-6 overflow-hidden rounded-[28px]" style={styles.banner}>
+      <View className="h-[320px]">
+        <Image source={{ uri: item.heroImage }} className="h-full w-full" contentFit="cover" />
         <LinearGradient
           colors={["transparent", "rgba(3,8,20,0.68)", "rgba(3,8,20,0.92)"]}
-          style={{ position: "absolute", left: 0, right: 0, bottom: 0, top: 0 }}
+          style={StyleSheet.absoluteFill}
         />
-        <View style={{ position: "absolute", left: 18, right: 18, bottom: 18 }}>
-          <Text style={{ color: "#FFF", fontSize: 13, fontWeight: "700", opacity: 0.88 }}>
+        <View className="absolute left-[18px] right-[18px] bottom-[18px]">
+          <Text className="text-[13px] font-bold" style={styles.subtitle}>
             {item.subtitle}
           </Text>
-          <Text style={{ color: "#FFF", fontSize: 30, fontWeight: "900", marginTop: 8 }}>
+          <Text className="mt-2 text-[30px] font-black" style={styles.title}>
             {item.title}
           </Text>
-          <Text style={{ color: "#E5E7EB", marginTop: 10, lineHeight: 20 }} numberOfLines={3}>
+          <Text className="mt-2.5" style={styles.description} numberOfLines={3}>
             {item.description}
           </Text>
-          <Pressable
-            onPress={() => onPrimaryPress(item.id)}
-            style={{
-              marginTop: 16,
-              alignSelf: "flex-start",
-              backgroundColor: colors.accent,
-              paddingHorizontal: 18,
-              paddingVertical: 12,
-              borderRadius: 999,
-            }}
-          >
-            <Text style={{ color: "#FFF", fontWeight: "800" }}>{item.primaryActionLabel}</Text>
+          <Pressable onPress={() => onPrimaryPress(item.id)} className="mt-4 self-start rounded-full px-[18px] py-3" style={styles.primaryButton}>
+            <Text className="font-extrabold" style={styles.primaryButtonText}>
+              {item.primaryActionLabel}
+            </Text>
           </Pressable>
         </View>
       </View>

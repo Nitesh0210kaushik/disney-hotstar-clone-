@@ -1,13 +1,13 @@
 import { useMemo, useState } from "react";
-import { RefreshControl, ScrollView, Text, View } from "react-native";
+import { RefreshControl, ScrollView, StyleSheet, Text, View } from "react-native";
 import { router } from "expo-router";
 
-import { appCopy } from "../data/copy";
-import { useAppTheme } from "../context/theme-context";
-import { HeroBanner } from "../components/HeroBanner";
-import { MediaRail } from "../components/MediaRail";
-import { SkeletonCard } from "../components/SkeletonCard";
-import { useHomeFeed } from "../hooks/useHomeFeed";
+import { appCopy } from "@/data/copy";
+import { useAppTheme } from "@/context/theme-context";
+import { HeroBanner } from "@/components/HeroBanner";
+import { MediaRail } from "@/components/MediaRail";
+import { SkeletonCard } from "@/components/SkeletonCard";
+import { useHomeFeed } from "@/hooks/useHomeFeed";
 
 export function HomeScreen() {
   const { colors } = useAppTheme();
@@ -15,11 +15,29 @@ export function HomeScreen() {
   const { data: feed, isLoading, reload } = useHomeFeed();
 
   const featured = useMemo(() => feed?.featured[0], [feed]);
+  const styles = useMemo(
+    () =>
+      StyleSheet.create({
+        scroll: {
+          backgroundColor: colors.background,
+        },
+        content: {
+          padding: 16,
+          paddingTop: 56,
+          paddingBottom: 36,
+        },
+        title: {
+          color: colors.text,
+        },
+      }),
+    [colors]
+  );
 
   return (
     <ScrollView
-      style={{ flex: 1, backgroundColor: colors.background }}
-      contentContainerStyle={{ padding: 16, paddingTop: 56, paddingBottom: 36 }}
+      className="flex-1"
+      style={styles.scroll}
+      contentContainerStyle={styles.content}
       refreshControl={
         <RefreshControl
           refreshing={refreshing}
@@ -32,14 +50,14 @@ export function HomeScreen() {
         />
       }
     >
-      <Text style={{ color: colors.text, fontSize: 28, fontWeight: "900", marginBottom: 18 }}>
+      <Text className="mb-[18px] text-[28px] font-black" style={styles.title}>
         {appCopy.appName}
       </Text>
 
       {featured ? (
         <HeroBanner item={featured} onPrimaryPress={(id) => router.push(`/detail/${id}`)} />
       ) : (
-        <View style={{ flexDirection: "row", gap: 14, marginBottom: 24 }}>
+        <View className="mb-6 flex-row gap-3.5">
           <SkeletonCard />
           <SkeletonCard />
         </View>
@@ -56,7 +74,7 @@ export function HomeScreen() {
           />
         ))
       ) : isLoading ? (
-        <View style={{ flexDirection: "row", gap: 14 }}>
+        <View className="flex-row gap-3.5">
           <SkeletonCard />
           <SkeletonCard />
           <SkeletonCard />

@@ -8,7 +8,7 @@ import {
 import { Appearance } from "react-native";
 import { MD3DarkTheme, MD3LightTheme } from "react-native-paper";
 
-import { ThemeMode } from "../types";
+import { ThemeMode } from "@/types";
 
 type ThemeColors = {
   background: string;

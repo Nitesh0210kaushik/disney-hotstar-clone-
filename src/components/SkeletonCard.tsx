@@ -1,11 +1,36 @@
-import { useEffect, useRef } from "react";
-import { Animated, View } from "react-native";
+import { useEffect, useMemo, useRef } from "react";
+import { Animated, StyleSheet, View } from "react-native";
 
-import { useAppTheme } from "../context/theme-context";
+import { useAppTheme } from "@/context/theme-context";
 
 export function SkeletonCard() {
   const { colors } = useAppTheme();
   const shimmer = useRef(new Animated.Value(0)).current;
+  const styles = useMemo(
+    () =>
+      StyleSheet.create({
+        card: {
+          width: 150,
+          height: 230,
+          borderRadius: 18,
+          overflow: "hidden",
+          backgroundColor: colors.surface,
+        },
+        inner: {
+          flex: 1,
+          backgroundColor: colors.surfaceElevated,
+          overflow: "hidden",
+        },
+        shimmer: {
+          position: "absolute",
+          top: 0,
+          bottom: 0,
+          width: 120,
+          backgroundColor: "rgba(255,255,255,0.18)",
+        },
+      }),
+    [colors]
+  );
 
   useEffect(() => {
     const animation = Animated.loop(
@@ -26,26 +51,9 @@ export function SkeletonCard() {
   });
 
   return (
-    <View
-      style={{
-        width: 150,
-        height: 230,
-        borderRadius: 18,
-        overflow: "hidden",
-        backgroundColor: colors.surface,
-      }}
-    >
-      <View style={{ flex: 1, backgroundColor: colors.surfaceElevated, overflow: "hidden" }}>
-        <Animated.View
-          style={{
-            position: "absolute",
-            top: 0,
-            bottom: 0,
-            width: 120,
-            backgroundColor: "rgba(255,255,255,0.18)",
-            transform: [{ translateX }],
-          }}
-        />
+    <View style={styles.card}>
+      <View style={styles.inner}>
+        <Animated.View style={[styles.shimmer, { transform: [{ translateX }] }]} />
       </View>
     </View>
   );

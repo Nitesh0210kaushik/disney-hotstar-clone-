@@ -1,83 +1,100 @@
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { useMemo } from "react";
 import { Image } from "expo-image";
 import { useLocalSearchParams, router } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
 
-import { useAppTheme } from "../context/theme-context";
-import { useWatchlist } from "../context/watchlist-context";
-import { useMediaDetails } from "../hooks/useMediaDetails";
+import { useAppTheme } from "@/context/theme-context";
+import { useWatchlist } from "@/context/watchlist-context";
+import { useMediaDetails } from "@/hooks/useMediaDetails";
 
 export function DetailScreen() {
   const { mediaId } = useLocalSearchParams<{ mediaId: string }>();
   const { colors } = useAppTheme();
   const { isSaved, toggleWatchlist } = useWatchlist();
   const { data: item, isLoading } = useMediaDetails(mediaId);
+  const styles = useMemo(
+    () =>
+      StyleSheet.create({
+        loading: {
+          backgroundColor: colors.background,
+        },
+        loadingText: {
+          color: colors.text,
+        },
+        scroll: {
+          backgroundColor: colors.background,
+        },
+        title: {
+          color: "#FFF",
+        },
+        description: {
+          color: "#E5E7EB",
+        },
+        chip: {
+          backgroundColor: colors.surface,
+        },
+        chipText: {
+          color: colors.text,
+        },
+        playButton: {
+          backgroundColor: colors.accent,
+        },
+        watchlistButton: {
+          backgroundColor: colors.surface,
+        },
+      }),
+    [colors]
+  );
 
   if (isLoading || !item) {
     return (
-      <View
-        style={{
-          flex: 1,
-          backgroundColor: colors.background,
-          justifyContent: "center",
-          alignItems: "center",
-        }}
-      >
-        <Text style={{ color: colors.text }}>Loading details...</Text>
+      <View className="flex-1 items-center justify-center" style={styles.loading}>
+        <Text style={styles.loadingText}>Loading details...</Text>
       </View>
     );
   }
 
   return (
-    <ScrollView style={{ flex: 1, backgroundColor: colors.background }}>
-      <View style={{ height: 360 }}>
-        <Image source={{ uri: item.backdropImage }} style={{ width: "100%", height: "100%" }} contentFit="cover" />
+    <ScrollView className="flex-1" style={styles.scroll}>
+      <View className="h-[360px]">
+        <Image source={{ uri: item.backdropImage }} className="h-full w-full" contentFit="cover" />
         <LinearGradient colors={["transparent", "rgba(3,8,20,0.95)"]} style={StyleSheet.absoluteFill} />
-        <View style={{ position: "absolute", left: 16, right: 16, bottom: 18 }}>
-          <Text style={{ color: "#FFF", fontSize: 30, fontWeight: "900" }}>{item.title}</Text>
-          <Text style={{ color: "#E5E7EB", marginTop: 6 }}>{item.description}</Text>
+        <View className="absolute left-4 right-4 bottom-[18px]">
+          <Text className="text-[30px] font-black" style={styles.title}>
+            {item.title}
+          </Text>
+          <Text className="mt-1.5" style={styles.description}>
+            {item.description}
+          </Text>
         </View>
       </View>
 
-      <View style={{ padding: 16, gap: 16 }}>
-        <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
+      <View className="gap-4 p-4">
+        <View className="flex-row flex-wrap gap-2">
           {item.genres.map((genre) => (
-            <View
-              key={genre}
-              style={{
-                borderRadius: 999,
-                paddingHorizontal: 12,
-                paddingVertical: 8,
-                backgroundColor: colors.surface,
-              }}
-            >
-              <Text style={{ color: colors.text, fontSize: 12 }}>{genre}</Text>
+            <View key={genre} className="rounded-full px-3 py-2" style={styles.chip}>
+              <Text className="text-xs" style={styles.chipText}>
+                {genre}
+              </Text>
             </View>
           ))}
         </View>
 
-        <View style={{ flexDirection: "row", gap: 12 }}>
+        <View className="flex-row gap-3">
           <Pressable
             onPress={() => router.push({ pathname: "/video/[mediaId]", params: { mediaId: item.id } })}
-            style={{
-              backgroundColor: colors.accent,
-              paddingVertical: 14,
-              paddingHorizontal: 18,
-              borderRadius: 999,
-            }}
+            className="rounded-full px-[18px] py-[14px]"
+            style={styles.playButton}
           >
-            <Text style={{ color: "#fff", fontWeight: "800" }}>Play</Text>
+            <Text className="font-extrabold text-white">Play</Text>
           </Pressable>
           <Pressable
             onPress={() => toggleWatchlist(item.id)}
-            style={{
-              backgroundColor: colors.surface,
-              paddingVertical: 14,
-              paddingHorizontal: 18,
-              borderRadius: 999,
-            }}
+            className="rounded-full px-[18px] py-[14px]"
+            style={styles.watchlistButton}
           >
-            <Text style={{ color: colors.text, fontWeight: "800" }}>
+            <Text className="font-extrabold" style={styles.chipText}>
               {isSaved(item.id) ? "Saved" : "Add to Watchlist"}
             </Text>
           </Pressable>

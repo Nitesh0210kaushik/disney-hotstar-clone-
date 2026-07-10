@@ -1,10 +1,22 @@
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { Tabs } from "expo-router";
+import { StyleSheet } from "react-native";
+import { useMemo } from "react";
 
-import { useAppTheme } from "../../context/theme-context";
+import { useAppTheme } from "@/context/theme-context";
 
 export default function TabsLayout() {
   const { colors } = useAppTheme();
+  const styles = useMemo(
+    () =>
+      StyleSheet.create({
+        tabBar: {
+          backgroundColor: colors.surface,
+          borderTopColor: colors.border,
+        },
+      }),
+    [colors]
+  );
 
   return (
     <Tabs
@@ -12,10 +24,7 @@ export default function TabsLayout() {
         headerShown: false,
         tabBarActiveTintColor: colors.accent,
         tabBarInactiveTintColor: colors.mutedText,
-        tabBarStyle: {
-          backgroundColor: colors.surface,
-          borderTopColor: colors.border,
-        },
+        tabBarStyle: styles.tabBar,
         tabBarIcon: ({ color, size }) => {
           const iconName =
             route.name === "index"

@@ -1,6 +1,7 @@
-import { Text, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
+import { useMemo } from "react";
 
-import { useAppTheme } from "../context/theme-context";
+import { useAppTheme } from "@/context/theme-context";
 
 interface SectionHeaderProps {
   title: string;
@@ -9,12 +10,28 @@ interface SectionHeaderProps {
 
 export function SectionHeader({ title, subtitle }: SectionHeaderProps) {
   const { colors } = useAppTheme();
+  const styles = useMemo(
+    () =>
+      StyleSheet.create({
+        title: {
+          color: colors.text,
+        },
+        subtitle: {
+          color: colors.mutedText,
+        },
+      }),
+    [colors]
+  );
 
   return (
-    <View style={{ marginBottom: 14 }}>
-      <Text style={{ color: colors.text, fontSize: 20, fontWeight: "800" }}>{title}</Text>
+    <View className="mb-3.5">
+      <Text className="text-xl font-extrabold" style={styles.title}>
+        {title}
+      </Text>
       {subtitle ? (
-        <Text style={{ color: colors.mutedText, marginTop: 4, fontSize: 13 }}>{subtitle}</Text>
+        <Text className="mt-1 text-[13px]" style={styles.subtitle}>
+          {subtitle}
+        </Text>
       ) : null}
     </View>
   );

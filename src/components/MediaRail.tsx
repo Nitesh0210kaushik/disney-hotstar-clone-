@@ -1,8 +1,8 @@
-import { FlatList, View } from "react-native";
+import { FlatList, StyleSheet, View } from "react-native";
 
-import { MediaItem } from "../types";
-import { MediaCard } from "./MediaCard";
-import { SectionHeader } from "./SectionHeader";
+import { MediaItem } from "@/types";
+import { MediaCard } from "@/components/MediaCard";
+import { SectionHeader } from "@/components/SectionHeader";
 
 interface MediaRailProps {
   title: string;
@@ -13,7 +13,7 @@ interface MediaRailProps {
 
 export function MediaRail({ title, subtitle, items, onPressItem }: MediaRailProps) {
   return (
-    <View style={{ marginBottom: 28 }}>
+    <View className="mb-7">
       <SectionHeader title={title} subtitle={subtitle} />
       <FlatList
         data={items}
@@ -21,8 +21,8 @@ export function MediaRail({ title, subtitle, items, onPressItem }: MediaRailProp
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => <MediaCard item={item} onPress={onPressItem} />}
         showsHorizontalScrollIndicator={false}
-        ItemSeparatorComponent={() => <View style={{ width: 14 }} />}
-        contentContainerStyle={{ paddingRight: 24 }}
+        ItemSeparatorComponent={() => <View className="w-[14px]" />}
+        contentContainerStyle={styles.listContent}
         initialNumToRender={3}
         windowSize={5}
         maxToRenderPerBatch={5}
@@ -30,3 +30,9 @@ export function MediaRail({ title, subtitle, items, onPressItem }: MediaRailProp
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  listContent: {
+    paddingRight: 24,
+  },
+});

@@ -1,7 +1,7 @@
 import { useCallback } from "react";
 
-import { fetchMediaById } from "../services/catalog";
-import { useAsyncResource } from "./useAsyncResource";
+import { fetchMediaById } from "@/services/catalog";
+import { useAsyncResource } from "@/hooks/useAsyncResource";
 
 export function useMediaDetails(mediaId?: string) {
   const loader = useCallback(() => {
