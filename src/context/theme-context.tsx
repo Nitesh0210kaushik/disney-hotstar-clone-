@@ -1,11 +1,14 @@
 import {
   createContext,
   PropsWithChildren,
+  useEffect,
   useContext,
   useMemo,
+  useRef,
   useState,
 } from "react";
 import { Appearance } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { MD3DarkTheme, MD3LightTheme } from "react-native-paper";
 
 import { ThemeMode } from "@/types";
@@ -53,10 +56,49 @@ const darkColors: ThemeColors = {
 };
 
 const ThemeContext = createContext<ThemeContextValue | undefined>(undefined);
+const THEME_STORAGE_KEY = "app-theme-mode";
 
 export function ThemeProvider({ children }: PropsWithChildren) {
   const systemMode = Appearance.getColorScheme() === "dark" ? "dark" : "light";
   const [mode, setMode] = useState<ThemeMode>(systemMode);
+  const hasHydrated = useRef(false);
+
+  useEffect(() => {
+    let isActive = true;
+
+    async function loadThemeMode() {
+      try {
+        const storedMode = await AsyncStorage.getItem(THEME_STORAGE_KEY);
+
+        if (!isActive || (storedMode !== "light" && storedMode !== "dark")) {
+          hasHydrated.current = true;
+          return;
+        }
+
+        setMode(storedMode);
+      } catch {
+        // Ignore storage errors and fall back to the current mode.
+      } finally {
+        hasHydrated.current = true;
+      }
+    }
+
+    loadThemeMode();
+
+    return () => {
+      isActive = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!hasHydrated.current) {
+      return;
+    }
+
+    AsyncStorage.setItem(THEME_STORAGE_KEY, mode).catch(() => {
+      // Ignore persistence errors.
+    });
+  }, [mode]);
 
   const colors = mode === "dark" ? darkColors : lightColors;
 

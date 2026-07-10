@@ -1,13 +1,12 @@
 import "@/global.css";
 import "react-native-reanimated";
 
+import { useMemo } from "react";
 import { Stack } from "expo-router";
+import { StyleSheet, StatusBar, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { PaperProvider } from "react-native-paper";
-import { StatusBar } from "expo-status-bar";
-import { StyleSheet } from "react-native";
-import { useMemo } from "react";
 
 import { ThemeProvider, useAppTheme } from "@/context/theme-context";
 import { WatchlistProvider } from "@/context/watchlist-context";
@@ -20,14 +19,26 @@ function AppShell() {
         stackContent: {
           backgroundColor: colors.background,
         },
+        safeArea: {
+          backgroundColor: colors.background,
+        },
       }),
     [colors]
   );
 
   return (
     <PaperProvider theme={paperTheme}>
-      <StatusBar style={isDark ? "light" : "dark"} />
-      <Stack screenOptions={{ headerShown: false, contentStyle: styles.stackContent }} />
+      <StatusBar
+        barStyle={isDark ? "light-content" : "dark-content"}
+        backgroundColor="transparent"
+        translucent={true}
+      />
+      <View
+        className="flex-1"
+        style={styles.safeArea}
+      >
+        <Stack screenOptions={{ headerShown: false, contentStyle: styles.stackContent }} />
+      </View>
     </PaperProvider>
   );
 }

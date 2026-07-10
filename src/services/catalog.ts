@@ -1,4 +1,4 @@
-import { HomeFeed, MediaItem, UserProfile } from "@/types";
+import { HomeFeed, MediaItem, PaginatedMediaResponse, UserProfile } from "@/types";
 import { homeFeed, mediaLibrary, profile } from "@/data/mock";
 
 const delay = <T,>(value: T, ms = 600) =>
@@ -8,6 +8,19 @@ const delay = <T,>(value: T, ms = 600) =>
 
 export function fetchHomeFeed(): Promise<HomeFeed> {
   return delay(homeFeed);
+}
+
+export function fetchMediaPage(page = 1, pageSize = 4): Promise<PaginatedMediaResponse> {
+  const start = (page - 1) * pageSize;
+  const items = mediaLibrary.slice(start, start + pageSize);
+  const hasMore = start + pageSize < mediaLibrary.length;
+
+  return delay({
+    items,
+    nextPage: hasMore ? page + 1 : null,
+    hasMore,
+    total: mediaLibrary.length,
+  });
 }
 
 export function fetchProfile(): Promise<UserProfile> {

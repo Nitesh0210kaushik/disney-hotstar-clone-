@@ -1,7 +1,8 @@
 import { memo, useMemo } from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 import { Image } from "expo-image";
 
+import { AnimatedPressable } from "@/components/AnimatedPressable";
 import { MediaItem } from "@/types";
 import { useAppTheme } from "@/context/theme-context";
 
@@ -43,13 +44,19 @@ export const MediaCard = memo(function MediaCard({ item, onPress, compact }: Med
   );
 
   return (
-    <Pressable onPress={() => onPress(item.id)} className={compact ? "w-[120px]" : "w-[160px]"}>
+    <AnimatedPressable
+      onPress={() => onPress(item.id)}
+      className={compact ? "w-[120px]" : "w-[160px]"}
+    >
       <View className="overflow-hidden rounded-[18px]" style={styles.card}>
         <Image
           source={{ uri: item.posterImage }}
+          placeholder={{ uri: item.backdropImage }}
           style={[styles.poster, compact ? styles.posterCompact : styles.posterRegular]}
           contentFit="cover"
           transition={200}
+          recyclingKey={item.id}
+          cachePolicy="memory-disk"
         />
         <View className="p-3">
           <Text numberOfLines={1} className="text-[15px] font-bold" style={styles.title}>
@@ -60,6 +67,6 @@ export const MediaCard = memo(function MediaCard({ item, onPress, compact }: Med
           </Text>
         </View>
       </View>
-    </Pressable>
+    </AnimatedPressable>
   );
 });

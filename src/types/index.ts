@@ -15,6 +15,7 @@ export interface MediaItem {
   heroImage: string;
   posterImage: string;
   backdropImage: string;
+  videoUrl: string;
   progress?: number;
   live?: boolean;
   primaryActionLabel: string;
@@ -30,6 +31,13 @@ export interface MediaSection {
 export interface HomeFeed {
   featured: MediaItem[];
   sections: MediaSection[];
+}
+
+export interface PaginatedMediaResponse {
+  items: MediaItem[];
+  nextPage: number | null;
+  hasMore: boolean;
+  total: number;
 }
 
 export interface UserProfile {

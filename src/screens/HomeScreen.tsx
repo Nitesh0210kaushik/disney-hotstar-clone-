@@ -1,20 +1,61 @@
-import { useMemo, useState } from "react";
-import { RefreshControl, ScrollView, StyleSheet, Text, View } from "react-native";
 import { router } from "expo-router";
+import { useCallback, useMemo, useState } from "react";
+import {
+  NativeScrollEvent,
+  NativeSyntheticEvent,
+  ActivityIndicator,
+  RefreshControl,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 
-import { appCopy } from "@/data/copy";
-import { useAppTheme } from "@/context/theme-context";
-import { HeroBanner } from "@/components/HeroBanner";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+
+import { HeroCarousel } from "@/components/HeroCarousel";
 import { MediaRail } from "@/components/MediaRail";
 import { SkeletonCard } from "@/components/SkeletonCard";
+import { StateCard } from "@/components/StateCard";
+import { useAppTheme } from "@/context/theme-context";
+import { appCopy } from "@/data/copy";
 import { useHomeFeed } from "@/hooks/useHomeFeed";
+import { usePaginatedMedia } from "@/hooks/usePaginatedMedia";
 
 export function HomeScreen() {
   const { colors } = useAppTheme();
+  const insets = useSafeAreaInsets();
   const [refreshing, setRefreshing] = useState(false);
-  const { data: feed, isLoading, reload } = useHomeFeed();
+  const { data: feed, isLoading, error, reload } = useHomeFeed();
+  const paginatedMedia = usePaginatedMedia(4);
+  const { loadMore, refresh: refreshPaginatedMedia } = paginatedMedia;
 
-  const featured = useMemo(() => feed?.featured[0], [feed]);
+  const featuredItems = useMemo(() => feed?.featured ?? [], [feed]);
+  const handlePressItem = useCallback((id: string) => {
+    router.push(`/detail/${id}`);
+  }, []);
+  const handleScroll = useCallback(
+    (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+      const { contentOffset, contentSize, layoutMeasurement } = event.nativeEvent;
+      const distanceFromBottom =
+        contentSize.height - (contentOffset.y + layoutMeasurement.height);
+
+      if (distanceFromBottom < 220) {
+        loadMore();
+      }
+    },
+    [loadMore]
+  );
+  const handleRefresh = useCallback(async () => {
+    setRefreshing(true);
+    try {
+      await Promise.all([reload(), refreshPaginatedMedia()]);
+    } catch {
+      // Error states are rendered below.
+    } finally {
+      setRefreshing(false);
+    }
+  }, [refreshPaginatedMedia, reload]);
   const styles = useMemo(
     () =>
       StyleSheet.create({
@@ -23,14 +64,17 @@ export function HomeScreen() {
         },
         content: {
           padding: 16,
-          paddingTop: 56,
+          paddingTop: insets.top + 16,
           paddingBottom: 36,
         },
         title: {
           color: colors.text,
         },
+        footerText: {
+          color: colors.mutedText,
+        },
       }),
-    [colors]
+    [colors, insets.top],
   );
 
   return (
@@ -38,14 +82,12 @@ export function HomeScreen() {
       className="flex-1"
       style={styles.scroll}
       contentContainerStyle={styles.content}
+      onScroll={handleScroll}
+      scrollEventThrottle={120}
       refreshControl={
         <RefreshControl
           refreshing={refreshing}
-          onRefresh={async () => {
-            setRefreshing(true);
-            await reload();
-            setRefreshing(false);
-          }}
+          onRefresh={handleRefresh}
           tintColor={colors.accent}
         />
       }
@@ -54,8 +96,11 @@ export function HomeScreen() {
         {appCopy.appName}
       </Text>
 
-      {featured ? (
-        <HeroBanner item={featured} onPrimaryPress={(id) => router.push(`/detail/${id}`)} />
+      {featuredItems.length ? (
+        <HeroCarousel
+          items={featuredItems}
+          onPrimaryPress={handlePressItem}
+        />
       ) : (
         <View className="mb-6 flex-row gap-3.5">
           <SkeletonCard />
@@ -67,10 +112,11 @@ export function HomeScreen() {
         feed.sections.map((section) => (
           <MediaRail
             key={section.id}
+            railId={section.id}
             title={section.title}
             subtitle={section.subtitle}
             items={section.items}
-            onPressItem={(id) => router.push(`/detail/${id}`)}
+            onPressItem={handlePressItem}
           />
         ))
       ) : isLoading ? (
@@ -78,6 +124,34 @@ export function HomeScreen() {
           <SkeletonCard />
           <SkeletonCard />
           <SkeletonCard />
+        </View>
+      ) : (
+        <StateCard
+          title={error ?? appCopy.home.emptyTitle}
+          body={appCopy.home.emptyBody}
+          actionTitle={appCopy.home.retry}
+          onAction={() => {
+            void handleRefresh();
+          }}
+        />
+      )}
+
+      {paginatedMedia.items.length ? (
+        <MediaRail
+          railId="more_to_explore"
+          title={appCopy.home.moreToExplore}
+          subtitle={appCopy.home.moreToExploreSubtitle}
+          items={paginatedMedia.items}
+          onPressItem={handlePressItem}
+        />
+      ) : null}
+
+      {paginatedMedia.isLoadingMore ? (
+        <View className="mb-4 flex-row items-center justify-center gap-2">
+          <ActivityIndicator color={colors.accent} />
+          <Text className="text-sm font-semibold" style={styles.footerText}>
+            {appCopy.home.loadingMore}
+          </Text>
         </View>
       ) : null}
     </ScrollView>
