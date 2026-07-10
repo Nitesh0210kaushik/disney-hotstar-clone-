@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "disney-hotstar-clone",
+    "name": "Disney+ Hotstar Clone",
     "slug": "disney-hotstar-clone",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -21,6 +21,7 @@
     },
     "web": {
       "output": "static",
+      "bundler": "metro",
       "favicon": "./assets/images/favicon.png"
     },
     "plugins": [
