@@ -1,6 +1,7 @@
 import { memo, useMemo } from "react";
 import { StyleSheet, Text, View, ViewStyle } from "react-native";
 import { Image } from "expo-image";
+import { LinearGradient } from "expo-linear-gradient";
 
 import { AnimatedPressable } from "@/components/AnimatedPressable";
 import { MediaItem } from "@/types";
@@ -41,11 +42,20 @@ export const MediaCard = memo(function MediaCard({
         posterRegular: {
           height: 220,
         },
+        overlay: {
+          position: "absolute",
+          left: 0,
+          right: 0,
+          bottom: 0,
+          paddingTop: 28,
+          paddingHorizontal: compact ? 10 : 12,
+          paddingBottom: compact ? 9 : 11,
+        },
         title: {
-          color: colors.text,
+          color: "#FFF",
         },
         subtitle: {
-          color: colors.mutedText,
+          color: "rgba(255,255,255,0.78)",
         },
       }),
     [colors, gridWidth]
@@ -68,7 +78,10 @@ export const MediaCard = memo(function MediaCard({
           cachePolicy="memory-disk"
         />
         {!posterOnly ? (
-          <View className="p-3">
+          <LinearGradient
+            colors={["transparent", "rgba(0,0,0,0.86)"]}
+            style={styles.overlay}
+          >
             <Text
               numberOfLines={1}
               className={`${compact ? "text-[11px]" : "text-[15px]"} font-bold`}
@@ -83,7 +96,7 @@ export const MediaCard = memo(function MediaCard({
             >
               {item.subtitle}
             </Text>
-          </View>
+          </LinearGradient>
         ) : null}
       </View>
     </AnimatedPressable>

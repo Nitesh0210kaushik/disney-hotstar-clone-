@@ -27,7 +27,7 @@ export function ProfileScreen() {
         },
         content: {
           paddingBottom: Math.max(insets.bottom, 0) + 104,
-          paddingTop: 6,
+          paddingTop: Math.max(insets.top, 0) + 12,
         },
         title: {
           color: colors.text,

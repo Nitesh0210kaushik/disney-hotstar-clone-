@@ -42,6 +42,7 @@ function MediaRailComponent({ railId, title, subtitle, items, onPressItem, onVie
       <FlatList
         data={items}
         horizontal
+        nestedScrollEnabled
         keyExtractor={keyExtractor}
         renderItem={renderItem}
         showsHorizontalScrollIndicator={false}

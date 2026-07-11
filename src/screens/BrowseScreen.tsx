@@ -30,7 +30,7 @@ export function BrowseScreen() {
     },
     [sectionId]
   );
-  const paginated = usePaginatedMedia(6, fetchSectionPage);
+  const paginated = usePaginatedMedia(9, fetchSectionPage);
   const isLoading = isSectionLoading || paginated.isLoading;
   const error = sectionError ?? paginated.error;
   const gridWidth = Math.max(92, Math.floor((width - 32 - 16) / 3));
@@ -86,6 +86,11 @@ export function BrowseScreen() {
     router.push(`/detail/${id}`);
   }, []);
 
+  const handleBackPress = useCallback(() => {
+    // A View All screen always belongs to the Home feed, including direct web opens.
+    router.replace("/(tabs)");
+  }, []);
+
   const renderItem = useCallback<ListRenderItem<MediaItem>>(
     ({ item }) => (
       <MediaCard
@@ -100,11 +105,58 @@ export function BrowseScreen() {
 
   if (isLoading) {
     return (
-      <View className="flex-1 p-4" style={[styles.screen, { paddingTop: insets.top + 16 }]}>
-        <View style={styles.loadingGrid}>
+      <View className="flex-1" style={styles.screen}>
+        <StatusBar
+          barStyle={isDark ? "light-content" : "dark-content"}
+          backgroundColor={colors.background}
+          translucent={false}
+          hidden={false}
+        />
+        <View
+          className="flex-row items-center gap-3 px-4"
+          style={{ paddingTop: Math.max(insets.top, 0) + 12 }}
+        >
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={appCopy.browse.back}
+            onPress={handleBackPress}
+            className="h-10 w-10 items-center justify-center rounded-full"
+            style={styles.backButton}
+          >
+            <MaterialCommunityIcons name="chevron-left" size={28} color={colors.text} />
+          </Pressable>
+          <View className="flex-1">
+            <Text className="text-[24px] font-black" style={styles.title}>
+              {appCopy.browse.loading}
+            </Text>
+            <Text className="mt-1 text-[13px]" style={styles.subtitle}>
+              {appCopy.browse.loading}
+            </Text>
+          </View>
+        </View>
+
+        <View className="flex-1 px-4" style={styles.loadingGrid}>
           {Array.from({ length: 9 }, (_, index) => (
-            <SkeletonCard key={`browse-skeleton-${index}`} width={gridWidth} height={gridWidth * 1.38} />
+            <SkeletonCard key={`browse-skeleton-${index}`} width={gridWidth} height={gridWidth * 1.52} />
           ))}
+        </View>
+
+        <View
+          className="flex-row items-center justify-around px-5 pt-3"
+          style={[styles.bottomBar, { paddingBottom: Math.max(insets.bottom, 10) }]}
+        >
+          <View className="items-center gap-1">
+            <MaterialCommunityIcons name="home-variant" size={27} color={colors.accent} />
+            <Text className="text-[11px] font-bold" style={styles.activeTab}>Home</Text>
+          </View>
+          <View className="items-center gap-1">
+            <MaterialCommunityIcons name="bookmark-multiple" size={27} color={colors.mutedText} />
+            <Text className="text-[11px] font-bold" style={styles.subtitle}>Watchlist</Text>
+          </View>
+          <View className="items-center gap-1">
+            <MaterialCommunityIcons name="account-circle" size={27} color={colors.mutedText} />
+            <Text className="text-[11px] font-bold" style={styles.subtitle}>Profile</Text>
+          </View>
         </View>
       </View>
     );
@@ -141,7 +193,7 @@ export function BrowseScreen() {
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={appCopy.browse.back}
-          onPress={() => router.back()}
+          onPress={handleBackPress}
           className="h-10 w-10 items-center justify-center rounded-full"
           style={styles.backButton}
         >

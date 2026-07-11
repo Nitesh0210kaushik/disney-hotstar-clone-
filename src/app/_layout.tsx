@@ -3,13 +3,17 @@ import "react-native-reanimated";
 
 import { useMemo } from "react";
 import { Stack } from "expo-router";
-import { StyleSheet, StatusBar, View } from "react-native";
+import { LogBox, StyleSheet, StatusBar, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { PaperProvider } from "react-native-paper";
 
 import { ThemeProvider, useAppTheme } from "@/context/theme-context";
 import { WatchlistProvider } from "@/context/watchlist-context";
+
+// React Native Web logs this benign warning when a nested horizontal rail
+// yields a gesture to the parent vertical feed.
+LogBox.ignoreLogs(["ScrollView doesn't take rejection well - scrolls anyway"]);
 
 function AppShell() {
   const { isDark, paperTheme, colors } = useAppTheme();

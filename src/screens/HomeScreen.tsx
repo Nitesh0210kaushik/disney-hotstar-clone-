@@ -10,6 +10,8 @@ import {
   View,
 } from "react-native";
 
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+
 import { HeroCarousel } from "@/components/HeroCarousel";
 import { MediaRail } from "@/components/MediaRail";
 import { SkeletonCard } from "@/components/SkeletonCard";
@@ -21,6 +23,7 @@ import { usePaginatedMedia } from "@/hooks/usePaginatedMedia";
 
 export function HomeScreen() {
   const { colors } = useAppTheme();
+  const insets = useSafeAreaInsets();
   const [refreshing, setRefreshing] = useState(false);
   const { data: feed, isLoading, error, reload } = useHomeFeed();
   const paginatedMedia = usePaginatedMedia(4);
@@ -59,21 +62,22 @@ export function HomeScreen() {
           backgroundColor: colors.background,
         },
         content: {
-          padding: 16,
-          paddingTop: 6,
-          paddingBottom: 96,
+          paddingHorizontal: 16,
+          paddingTop: Math.max(insets.top, 0) + 12,
+          paddingBottom: Math.max(insets.bottom, 0) + 96,
         },
         title: {
           color: colors.text,
         },
       }),
-    [colors],
+    [colors, insets],
   );
 
   return (
     <ScrollView
       className="flex-1"
       style={styles.scroll}
+      nestedScrollEnabled
       contentContainerStyle={styles.content}
       onScroll={handleScroll}
       scrollEventThrottle={120}

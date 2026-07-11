@@ -3,18 +3,23 @@ import { useCallback, useMemo, useState } from "react";
 import {
   FlatList,
   ListRenderItem,
+  Pressable,
   RefreshControl,
   StyleSheet,
   Text,
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import Swipeable from "react-native-gesture-handler/Swipeable";
+import { Image } from "expo-image";
+import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 
-import { MediaCard } from "@/components/MediaCard";
 import { SkeletonBlock } from "@/components/SkeletonBlock";
 import { StateCard } from "@/components/StateCard";
 import { SurfaceCard } from "@/components/SurfaceCard";
+import { TagPill } from "@/components/TagPill";
 import { useAppTheme } from "@/context/theme-context";
+import { useWatchlist } from "@/context/watchlist-context";
 import { appCopy } from "@/data/copy";
 import { useWatchlistFeed } from "@/hooks/useWatchlistFeed";
 import { MediaItem } from "@/types";
@@ -23,7 +28,9 @@ export function WatchlistScreen() {
   const { colors } = useAppTheme();
   const insets = useSafeAreaInsets();
   const { data: items, isLoading, error, reload } = useWatchlistFeed();
+  const { toggleWatchlist } = useWatchlist();
   const [refreshing, setRefreshing] = useState(false);
+
   const styles = useMemo(
     () =>
       StyleSheet.create({
@@ -45,9 +52,25 @@ export function WatchlistScreen() {
         card: {
           backgroundColor: colors.surface,
         },
-        column: {
-          justifyContent: "space-between",
-          marginBottom: 14,
+        rowCard: {
+          backgroundColor: colors.surface,
+          borderColor: colors.border,
+          borderWidth: 1,
+        },
+        rowPoster: {
+          width: 76,
+          height: 104,
+          borderRadius: 12,
+          backgroundColor: colors.surfaceElevated,
+        },
+        rowTitle: {
+          color: colors.text,
+        },
+        rowSubtitle: {
+          color: colors.mutedText,
+        },
+        swipeContainer: {
+          overflow: "visible",
         },
       }),
     [colors]
@@ -67,8 +90,66 @@ export function WatchlistScreen() {
   }, []);
 
   const renderItem = useCallback<ListRenderItem<MediaItem>>(
-    ({ item }) => <MediaCard item={item} onPress={handlePressItem} />,
-    [handlePressItem]
+    ({ item }) => {
+      const renderRightActions = () => (
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Delete item"
+          onPress={() => toggleWatchlist(item.id)}
+          className="w-[72px] bg-[#EF4444] rounded-[20px] mb-3.5 justify-center items-center ml-2"
+        >
+          <MaterialCommunityIcons name="trash-can-outline" size={24} color="#FFF" />
+        </Pressable>
+      );
+
+      return (
+        <Swipeable renderRightActions={renderRightActions} containerStyle={styles.swipeContainer}>
+          <Pressable
+            onPress={() => handlePressItem(item.id)}
+            className="flex-row items-center p-3 rounded-[20px] mb-3.5"
+            style={styles.rowCard}
+          >
+            {/* Poster Image */}
+            <Image
+              source={{ uri: item.posterImage }}
+              style={styles.rowPoster}
+              contentFit="cover"
+              transition={200}
+              cachePolicy="memory-disk"
+            />
+            {/* Info */}
+            <View className="flex-1 ml-4 justify-between h-[100px] py-1">
+              <View>
+                <Text
+                  numberOfLines={1}
+                  className="text-[16px] font-black"
+                  style={styles.rowTitle}
+                >
+                  {item.title}
+                </Text>
+                <Text
+                  numberOfLines={1}
+                  className="text-xs mt-1 font-semibold"
+                  style={styles.rowSubtitle}
+                >
+                  {item.year} • {item.rating} • {item.duration}
+                </Text>
+              </View>
+              {/* Genres Row */}
+              <View className="flex-row flex-wrap gap-1.5 mt-2">
+                {item.genres.slice(0, 2).map((genre) => (
+                  <TagPill key={genre} label={genre} />
+                ))}
+              </View>
+            </View>
+            <View className="justify-center pl-2">
+              <MaterialCommunityIcons name="chevron-right" size={24} color={colors.mutedText} />
+            </View>
+          </Pressable>
+        </Swipeable>
+      );
+    },
+    [colors.mutedText, handlePressItem, styles, toggleWatchlist]
   );
 
   if (isLoading) {
@@ -106,10 +187,9 @@ export function WatchlistScreen() {
       data={savedItems}
       keyExtractor={(item) => `watchlist-${item.id}`}
       renderItem={renderItem}
-      numColumns={2}
-      columnWrapperStyle={styles.column}
+      numColumns={1}
       style={styles.container}
-      contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + 96 }]}
+      contentContainerStyle={[styles.content, { paddingTop: insets.top + 12, paddingBottom: insets.bottom + 96 }]}
       showsVerticalScrollIndicator={false}
       initialNumToRender={4}
       windowSize={5}

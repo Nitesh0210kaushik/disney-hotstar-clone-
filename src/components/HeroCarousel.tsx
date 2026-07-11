@@ -19,15 +19,16 @@ interface HeroCarouselProps {
 
 function HeroCarouselComponent({ items, onPrimaryPress }: HeroCarouselProps) {
   const { width } = useWindowDimensions();
-  const cardWidth = Math.max(width - 32, 280);
+  // Keep enough room for the next slide to peek in from the right.
+  const cardWidth = Math.floor(width * 0.68);
   const listRef = useRef<FlatList<MediaItem>>(null);
-  const activeIndexRef = useRef(items.length > 1 ? 1 : 0);
+  const activeIndexRef = useRef(0);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const carouselData = useMemo(() => {
     if (items.length <= 1) return items;
-    // Clone last item to start, and first item to end
-    return [items[items.length - 1], ...items, items[0]];
+    // Three copies keep the same neighbours around A when the buffer recenters.
+    return [...items, ...items, ...items];
   }, [items]);
 
   const styles = useMemo(
@@ -35,6 +36,8 @@ function HeroCarouselComponent({ items, onPrimaryPress }: HeroCarouselProps) {
       StyleSheet.create({
         content: {
           paddingBottom: 8,
+          paddingLeft: 16,
+          paddingRight: 16,
         },
         separator: {
           width: 12,
@@ -43,7 +46,7 @@ function HeroCarouselComponent({ items, onPrimaryPress }: HeroCarouselProps) {
           width: cardWidth,
         },
       }),
-    [cardWidth]
+    [cardWidth, width]
   );
 
   const stopTimer = useCallback(() => {
@@ -62,15 +65,10 @@ function HeroCarouselComponent({ items, onPrimaryPress }: HeroCarouselProps) {
 
       let nextIndex = activeIndexRef.current + 1;
 
-      if (nextIndex > items.length + 1) {
-        // Self-correcting snap: if we somehow exceed the cloned boundary (e.g. delayed scroll events),
-        // snap instantly to the first real item (index 1) and target the second item (index 2).
-        try {
-          listRef.current.scrollToIndex({ index: 1, animated: false });
-        } catch {
-          // Ignore layout warnings
-        }
-        nextIndex = 2;
+      if (nextIndex > items.length * 2) {
+        listRef.current.scrollToIndex({ index: items.length, animated: false });
+        activeIndexRef.current = items.length;
+        return;
       }
 
       activeIndexRef.current = nextIndex;
@@ -80,6 +78,16 @@ function HeroCarouselComponent({ items, onPrimaryPress }: HeroCarouselProps) {
           index: nextIndex,
           animated: true,
         });
+
+        // Recenter after A has the same visible neighbours in the next copy.
+        if (nextIndex === items.length * 2) {
+          setTimeout(() => {
+            if (activeIndexRef.current >= items.length * 2) {
+              listRef.current?.scrollToIndex({ index: items.length, animated: false });
+              activeIndexRef.current = items.length;
+            }
+          }, 700);
+        }
       } catch {
         // Ignore layout warnings
       }
@@ -88,7 +96,7 @@ function HeroCarouselComponent({ items, onPrimaryPress }: HeroCarouselProps) {
 
   useEffect(() => {
     // Reset active index when items change
-    activeIndexRef.current = items.length > 1 ? 1 : 0;
+    activeIndexRef.current = items.length > 1 ? items.length : 0;
     startTimer();
     return () => stopTimer();
   }, [items, startTimer, stopTimer]);
@@ -103,18 +111,12 @@ function HeroCarouselComponent({ items, onPrimaryPress }: HeroCarouselProps) {
       let finalIndex = index;
 
       if (items.length > 1) {
-        try {
-          if (index === 0) {
-            // Snap silently to real last item
-            finalIndex = items.length;
-            listRef.current?.scrollToIndex({ index: finalIndex, animated: false });
-          } else if (index === items.length + 1) {
-            // Snap silently to real first item
-            finalIndex = 1;
-            listRef.current?.scrollToIndex({ index: finalIndex, animated: false });
-          }
-        } catch {
-          // Ignore layout warnings
+        if (index >= items.length * 2) {
+          finalIndex = items.length;
+          listRef.current?.scrollToIndex({ index: finalIndex, animated: false });
+        } else if (index < items.length) {
+          finalIndex = index + items.length;
+          listRef.current?.scrollToIndex({ index: finalIndex, animated: false });
         }
       }
 
@@ -169,7 +171,8 @@ function HeroCarouselComponent({ items, onPrimaryPress }: HeroCarouselProps) {
       ref={listRef}
       data={carouselData}
       horizontal
-      pagingEnabled
+      nestedScrollEnabled
+      snapToInterval={cardWidth + 12}
       snapToAlignment="start"
       decelerationRate="fast"
       showsHorizontalScrollIndicator={false}
@@ -180,9 +183,9 @@ function HeroCarouselComponent({ items, onPrimaryPress }: HeroCarouselProps) {
       initialNumToRender={items.length > 1 ? 3 : 1}
       windowSize={3}
       maxToRenderPerBatch={3}
-      removeClippedSubviews
+      removeClippedSubviews={false}
       getItemLayout={getItemLayout}
-      initialScrollIndex={items.length > 1 ? 1 : 0}
+      initialScrollIndex={items.length > 1 ? items.length : 0}
       onScrollBeginDrag={handleScrollBeginDrag}
       onMomentumScrollEnd={handleMomentumScrollEnd}
       onScrollEndDrag={handleScrollEndDrag}

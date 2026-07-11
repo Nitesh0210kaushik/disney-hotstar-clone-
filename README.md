@@ -31,7 +31,7 @@ npx expo start -c
 ## App Flow
 
 - Home: content-rich feed with an immersive hero carousel, categorized rails, pull-to-refresh, skeleton loaders, and empty/error states.
-- Detail: rich media detail view with hero artwork, animated sticky header, metadata, genres, tags, story content, watchlist action, and video entry.
+- Detail: rich media detail view with hero artwork, stable back navigation, metadata, genres, tags, story content, watchlist action, and video entry.
 - Watchlist: saved media feed driven by the watchlist context.
 - Profile: settings screen using React Native Paper cards, buttons, and switches for clear component-library usage.
 - Video: native `expo-video` player on Android/iOS with a web-safe video fallback.
@@ -64,7 +64,7 @@ React Native Paper is used in the Profile screen for visible component-library c
 - Item press handlers and render functions use `useCallback` where they are passed into lists.
 - Derived feed values and theme-based styles use `useMemo`.
 - Images use `expo-image` with caching, placeholders, content fitting, and recycling keys.
-- The Detail screen uses a lightweight native `Animated` sticky header for polish without adding layout-heavy work during transitions.
+- Detail navigation keeps the hero and back action stable while the content scrolls, avoiding layout shifts during transitions.
 
 ## UX Completeness
 
@@ -96,6 +96,22 @@ Run Expo diagnostics:
 npx expo-doctor
 ```
 
+## Submission Media
+
+The screenshots and voice-over screen recording should demonstrate this project, either from the installed APK or from the running Expo Go app. The recording should cover:
+
+- Home hero carousel, content rails, and View All navigation
+- Detail screen metadata, watchlist action, and video playback
+- Watchlist persistence after saving a title
+- Profile settings with light/dark theme switching
+- Loading, refresh, pagination, error, and empty states where applicable
+
+The voice-over should briefly explain the user flow, reusable component architecture, mock service layer, NativeWind and React Native Paper usage, persistence, and list performance choices.
+
+For the final submission, also provide the repository link and either an Expo Go share link or a generated APK link.
+
 ## Assignment Notes
+
+The app icon uses a locally bundled Disney+ Hotstar logo asset downloaded from Seeklogo for the demo build. The asset is bundled locally so the app does not depend on an internet connection at runtime.
 
 The implementation is not a 1:1 clone. It uses Disney+ Hotstar as a benchmark for hierarchy and content discovery while adding clearer data separation, reusable UI primitives, polished edge states, and performance-conscious list rendering.
