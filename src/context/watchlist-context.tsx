@@ -1,4 +1,7 @@
-import { createContext, PropsWithChildren, useContext, useMemo, useState } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { createContext, PropsWithChildren, useContext, useEffect, useMemo, useState } from "react";
+
+const WATCHLIST_STORAGE_KEY = "watchlist-media-ids";
 
 interface WatchlistContextValue {
   watchlistIds: string[];
@@ -6,12 +9,44 @@ interface WatchlistContextValue {
   isSaved: (mediaId: string) => boolean;
   toggleWatchlist: (mediaId: string) => void;
   clearWatchlist: () => void;
+  isHydrated: boolean;
 }
 
 const WatchlistContext = createContext<WatchlistContextValue | undefined>(undefined);
 
 export function WatchlistProvider({ children }: PropsWithChildren) {
   const [watchlistIds, setWatchlistIds] = useState<string[]>(["galaxy-quest"]);
+  const [isHydrated, setIsHydrated] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+
+    void AsyncStorage.getItem(WATCHLIST_STORAGE_KEY)
+      .then((storedValue) => {
+        if (!active) return;
+
+        if (storedValue) {
+          const parsed = JSON.parse(storedValue);
+          if (Array.isArray(parsed)) {
+            setWatchlistIds(parsed.filter((id): id is string => typeof id === "string"));
+          }
+        }
+        setIsHydrated(true);
+      })
+      .catch(() => {
+        if (active) setIsHydrated(true);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (isHydrated) {
+      void AsyncStorage.setItem(WATCHLIST_STORAGE_KEY, JSON.stringify(watchlistIds));
+    }
+  }, [isHydrated, watchlistIds]);
 
   const value = useMemo<WatchlistContextValue>(
     () => ({
@@ -26,8 +61,9 @@ export function WatchlistProvider({ children }: PropsWithChildren) {
         );
       },
       clearWatchlist: () => setWatchlistIds([]),
+      isHydrated,
     }),
-    [watchlistIds]
+    [isHydrated, watchlistIds]
   );
 
   return <WatchlistContext.Provider value={value}>{children}</WatchlistContext.Provider>;

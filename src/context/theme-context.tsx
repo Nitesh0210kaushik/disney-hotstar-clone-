@@ -45,14 +45,14 @@ const lightColors: ThemeColors = {
 };
 
 const darkColors: ThemeColors = {
-  background: "#07111F",
-  surface: "#0F1729",
-  surfaceElevated: "#15213A",
-  text: "#F8FAFC",
-  mutedText: "#94A3B8",
-  border: "#243247",
-  accent: "#4BA3FF",
-  accentSoft: "#102B47",
+  background: "#0B0B0D",
+  surface: "#1A1A1F",
+  surfaceElevated: "#25252B",
+  text: "#F5F5F7",
+  mutedText: "#A1A1AA",
+  border: "#2B2B31",
+  accent: "#F4B942",
+  accentSoft: "#332A13",
 };
 
 const ThemeContext = createContext<ThemeContextValue | undefined>(undefined);

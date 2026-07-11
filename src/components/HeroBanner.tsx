@@ -42,11 +42,10 @@ export function HeroBanner({ item, onPrimaryPress, className, style }: HeroBanne
 
   return (
     <View className={`mb-6 overflow-hidden rounded-[28px] ${className ?? ""}`} style={[styles.banner, style]}>
-      <View className="h-[320px]">
+      <View className="h-[320px] w-full">
         <Image
-          source={{ uri: item.heroImage }}
-          placeholder={{ uri: item.backdropImage }}
-          className="h-full w-full"
+          source={item.heroImage}
+          style={[StyleSheet.absoluteFill, { width: '100%', height: '100%' }]}
           contentFit="cover"
           transition={250}
           recyclingKey={item.id}

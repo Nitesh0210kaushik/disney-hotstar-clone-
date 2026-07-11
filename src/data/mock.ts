@@ -1,23 +1,24 @@
 import { HomeFeed, MediaItem, UserProfile } from "@/types";
 
 const previewVideos = {
-  flower: "https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4",
-  bunny: "https://www.w3schools.com/html/mov_bbb.mp4",
+  flower:
+    "https://media.w3.org/2010/05/sintel/trailer.mp4",
+  bunny:
+    "https://media.w3.org/2010/05/bunny/trailer.mp4",
   bigBuckBunny:
-    "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
+    "https://media.w3.org/2010/05/bunny/trailer.mp4",
   elephantsDream:
-    "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4",
-  sintel: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4",
+    "https://media.w3.org/2010/05/sintel/trailer.mp4",
+  sintel: "https://media.w3.org/2010/05/sintel/trailer.mp4",
   tearsOfSteel:
-    "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4",
+    "https://media.w3.org/2010/05/sintel/trailer.mp4",
   streetAndDirt:
-    "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/SubaruOutbackOnStreetAndDirt.mp4",
+    "https://media.w3.org/2010/05/bunny/trailer.mp4",
   gtiReview:
-    "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/VolkswagenGTIReview.mp4",
-  biggerFun:
-    "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4",
+    "https://media.w3.org/2010/05/bunny/trailer.mp4",
+  biggerFun: "https://media.w3.org/2010/05/bunny/trailer.mp4",
   biggerEscapes:
-    "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4",
+    "https://media.w3.org/2010/05/sintel/trailer.mp4",
 } as const;
 
 export const mediaLibrary: MediaItem[] = [
@@ -51,7 +52,7 @@ export const mediaLibrary: MediaItem[] = [
       "A bright animated forest comedy with playful characters and family-friendly energy.",
     type: "special",
     year: 2025,
-    duration: "10m",
+    duration: "15s Preview",
     rating: "U",
     genres: ["Animation", "Comedy", "Family"],
     tags: ["Family", "Trending"],
@@ -238,10 +239,81 @@ const expandedMedia: MediaItem[] = [
   },
 ];
 
-mediaLibrary.push(...expandedMedia);
+const extraTitles = [
+  "Neon Horizon",
+  "Wild Pixel",
+  "Ocean Signal",
+  "Moonlight Run",
+  "The Last Campfire",
+  "Solar Drift",
+  "Hidden Valley",
+  "Blue Current",
+  "Orbit Kids",
+  "After the Storm",
+  "City Rhythm",
+  "The Open Road",
+  "Dream Factory",
+  "Wildlife Diaries",
+  "Midnight Code",
+  "Small Wonders",
+  "Beyond the Map",
+  "Weekend Stories",
+  "Parallel Skies",
+  "Golden Hour",
+] as const;
+
+const extraSubtitles = [
+  "Sci-Fi Adventure",
+  "Family Animation",
+  "Ocean Mystery",
+  "Action Preview",
+  "Fantasy Short",
+] as const;
+
+const extraImages = [
+  "https://images.unsplash.com/photo-1519608487953-e999c86e7455?auto=format&fit=crop&w=900&q=80",
+  "https://images.unsplash.com/photo-1534972195531-d756b9bfa9f2?auto=format&fit=crop&w=900&q=80",
+  "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=900&q=80",
+  "https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?auto=format&fit=crop&w=900&q=80",
+  "https://images.unsplash.com/photo-1490750967868-88aa4486c946?auto=format&fit=crop&w=900&q=80",
+] as const;
+
+const extraVideos = [
+  previewVideos.bigBuckBunny,
+  previewVideos.sintel,
+  previewVideos.biggerEscapes,
+  previewVideos.tearsOfSteel,
+  previewVideos.flower,
+] as const;
+
+const extraMedia: MediaItem[] = extraTitles.map((title, index) => {
+  const image = extraImages[index % extraImages.length];
+  const isFamily = index % 3 === 1;
+
+  return {
+    id: `discovery-${index + 1}`,
+    title,
+    subtitle: extraSubtitles[index % extraSubtitles.length],
+    description: `A fresh ${isFamily ? "family-friendly" : "cinematic"} preview with memorable characters, visual energy, and a story made for quick discovery.`,
+    type: index % 4 === 0 ? "movie" : "special",
+    year: 2024 + (index % 3),
+    duration: `${10 + (index % 6)}m Preview`,
+    rating: index % 4 === 0 ? "U/A 13+" : "U",
+    genres: isFamily ? ["Animation", "Family"] : ["Adventure", "Drama"],
+    tags: [index % 2 === 0 ? "Trending" : "New", index % 3 === 0 ? "Featured" : "Quick Watch"],
+    heroImage: image,
+    posterImage: image,
+    backdropImage: image,
+    videoUrl: extraVideos[index % extraVideos.length],
+    progress: index % 5 === 0 ? 0.2 + (index % 4) * 0.12 : undefined,
+    primaryActionLabel: index % 3 === 0 ? "Watch" : "Play Now",
+  };
+});
+
+mediaLibrary.push(...expandedMedia, ...extraMedia);
 
 export const homeFeed: HomeFeed = {
-  featured: mediaLibrary.slice(0, 5),
+    featured: mediaLibrary.slice(0, 6),
   sections: [
     {
       id: "continue_watching",
@@ -253,7 +325,7 @@ export const homeFeed: HomeFeed = {
       id: "trending_now",
       title: "Trending Now",
       subtitle: "What everyone is watching today",
-      items: mediaLibrary.slice(1, 9),
+      items: mediaLibrary.slice(1, 21),
     },
     {
       id: "featured",
@@ -273,7 +345,7 @@ export const homeFeed: HomeFeed = {
       id: "fresh_stories",
       title: "Fresh Stories",
       subtitle: "New worlds, cities, and characters to explore",
-      items: mediaLibrary.slice(4),
+      items: mediaLibrary.slice(4, 26),
     },
   ],
 };

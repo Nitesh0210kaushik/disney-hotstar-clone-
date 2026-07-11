@@ -3,15 +3,12 @@ import { useCallback, useMemo, useState } from "react";
 import {
   NativeScrollEvent,
   NativeSyntheticEvent,
-  ActivityIndicator,
   RefreshControl,
   ScrollView,
   StyleSheet,
   Text,
   View,
 } from "react-native";
-
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { HeroCarousel } from "@/components/HeroCarousel";
 import { MediaRail } from "@/components/MediaRail";
@@ -24,7 +21,6 @@ import { usePaginatedMedia } from "@/hooks/usePaginatedMedia";
 
 export function HomeScreen() {
   const { colors } = useAppTheme();
-  const insets = useSafeAreaInsets();
   const [refreshing, setRefreshing] = useState(false);
   const { data: feed, isLoading, error, reload } = useHomeFeed();
   const paginatedMedia = usePaginatedMedia(4);
@@ -64,17 +60,14 @@ export function HomeScreen() {
         },
         content: {
           padding: 16,
-          paddingTop: insets.top + 16,
-          paddingBottom: 36,
+          paddingTop: 6,
+          paddingBottom: 96,
         },
         title: {
           color: colors.text,
         },
-        footerText: {
-          color: colors.mutedText,
-        },
       }),
-    [colors, insets.top],
+    [colors],
   );
 
   return (
@@ -117,6 +110,7 @@ export function HomeScreen() {
             subtitle={section.subtitle}
             items={section.items}
             onPressItem={handlePressItem}
+            onViewAll={() => router.push({ pathname: "/browse/[sectionId]", params: { sectionId: section.id } })}
           />
         ))
       ) : isLoading ? (
@@ -143,17 +137,15 @@ export function HomeScreen() {
           subtitle={appCopy.home.moreToExploreSubtitle}
           items={paginatedMedia.items}
           onPressItem={handlePressItem}
+          onViewAll={() =>
+            router.push({
+              pathname: "/browse/[sectionId]",
+              params: { sectionId: "more_to_explore" },
+            })
+          }
         />
       ) : null}
 
-      {paginatedMedia.isLoadingMore ? (
-        <View className="mb-4 flex-row items-center justify-center gap-2">
-          <ActivityIndicator color={colors.accent} />
-          <Text className="text-sm font-semibold" style={styles.footerText}>
-            {appCopy.home.loadingMore}
-          </Text>
-        </View>
-      ) : null}
     </ScrollView>
   );
 }

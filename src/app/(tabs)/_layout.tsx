@@ -1,7 +1,7 @@
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { Tabs } from "expo-router";
 import { useMemo } from "react";
-import { Platform, StyleSheet } from "react-native";
+import { ColorValue, Platform, StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { useAppTheme } from "@/context/theme-context";
@@ -13,7 +13,9 @@ export default function TabsLayout() {
       StyleSheet.create({
         tabBar: {
           backgroundColor: colors.surface,
-          borderTopColor: colors.border,
+          borderTopWidth: 0,
+          elevation: 0,
+          shadowOpacity: 0,
           height: Platform.OS === "ios" ? 82 : 60,
           paddingTop: Platform.OS === "ios" ? 6 : 0,
           paddingBottom: Platform.OS === "ios" ? 20 : 0,
@@ -39,7 +41,7 @@ export default function TabsLayout() {
   );
 
   return (
-    <SafeAreaView edges={["top", "left", "right"]} style={styles.safeArea}>
+    <SafeAreaView edges={["top", "left", "right", "bottom"]} style={styles.safeArea}>
       <Tabs
         screenOptions={({ route }) => ({
           headerShown: false,
@@ -49,7 +51,8 @@ export default function TabsLayout() {
           tabBarItemStyle: styles.tabItem,
           tabBarLabelStyle: styles.tabLabel,
           tabBarIconStyle: styles.tabIcon,
-          tabBarIcon: ({ color, size }) => {
+          tabBarHideOnKeyboard: false,
+          tabBarIcon: ({ color, size }: { focused: boolean; color: ColorValue; size: number }) => {
             const iconName =
               route.name === "index"
                 ? "home-variant"

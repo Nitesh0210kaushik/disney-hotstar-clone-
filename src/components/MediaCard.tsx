@@ -1,5 +1,5 @@
 import { memo, useMemo } from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, View, ViewStyle } from "react-native";
 import { Image } from "expo-image";
 
 import { AnimatedPressable } from "@/components/AnimatedPressable";
@@ -10,25 +10,33 @@ interface MediaCardProps {
   item: MediaItem;
   onPress: (id: string) => void;
   compact?: boolean;
+  posterOnly?: boolean;
+  gridWidth?: number;
 }
 
-export const MediaCard = memo(function MediaCard({ item, onPress, compact }: MediaCardProps) {
+export const MediaCard = memo(function MediaCard({
+  item,
+  onPress,
+  compact,
+  posterOnly,
+  gridWidth,
+}: MediaCardProps) {
   const { colors } = useAppTheme();
   const styles = useMemo(
     () =>
       StyleSheet.create({
         card: {
           backgroundColor: colors.surface,
-          shadowColor: "#000",
-          shadowOpacity: 0.14,
-          shadowRadius: 12,
-          elevation: 4,
+          borderWidth: 0,
+          borderColor: "transparent",
+          shadowOpacity: 0,
+          elevation: 0,
         },
         poster: {
           width: "100%",
         },
         posterCompact: {
-          height: 170,
+          height: gridWidth ? gridWidth * 1.38 : 170,
         },
         posterRegular: {
           height: 220,
@@ -40,32 +48,43 @@ export const MediaCard = memo(function MediaCard({ item, onPress, compact }: Med
           color: colors.mutedText,
         },
       }),
-    [colors]
+    [colors, gridWidth]
   );
 
   return (
     <AnimatedPressable
       onPress={() => onPress(item.id)}
-      className={compact ? "w-[120px]" : "w-[160px]"}
+      className={compact ? "w-[108px]" : "w-[160px]"}
+      style={gridWidth ? { width: gridWidth } : undefined}
+      containerStyle={gridWidth ? ({ width: gridWidth } satisfies ViewStyle) : undefined}
     >
-      <View className="overflow-hidden rounded-[18px]" style={styles.card}>
+      <View className={`overflow-hidden ${posterOnly ? "rounded-[8px]" : "rounded-[18px]"}`} style={styles.card}>
         <Image
           source={{ uri: item.posterImage }}
-          placeholder={{ uri: item.backdropImage }}
           style={[styles.poster, compact ? styles.posterCompact : styles.posterRegular]}
           contentFit="cover"
           transition={200}
           recyclingKey={item.id}
           cachePolicy="memory-disk"
         />
-        <View className="p-3">
-          <Text numberOfLines={1} className="text-[15px] font-bold" style={styles.title}>
-            {item.title}
-          </Text>
-          <Text numberOfLines={1} className="mt-1 text-xs" style={styles.subtitle}>
-            {item.subtitle}
-          </Text>
-        </View>
+        {!posterOnly ? (
+          <View className="p-3">
+            <Text
+              numberOfLines={1}
+              className={`${compact ? "text-[11px]" : "text-[15px]"} font-bold`}
+              style={styles.title}
+            >
+              {item.title}
+            </Text>
+            <Text
+              numberOfLines={1}
+              className={`mt-1 ${compact ? "text-[9px]" : "text-xs"}`}
+              style={styles.subtitle}
+            >
+              {item.subtitle}
+            </Text>
+          </View>
+        ) : null}
       </View>
     </AnimatedPressable>
   );

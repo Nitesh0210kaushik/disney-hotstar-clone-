@@ -1,10 +1,10 @@
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
-import { Animated, Platform, Pressable, StyleSheet, Text, View } from "react-native";
-import { useMemo, useRef } from "react";
+import { Pressable, ScrollView, StatusBar, StyleSheet, Text, View } from "react-native";
+import { useMemo } from "react";
 import { Image } from "expo-image";
 import { useLocalSearchParams, router } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 import { AppButton } from "@/components/AppButton";
 import { SkeletonBlock } from "@/components/SkeletonBlock";
@@ -18,11 +18,9 @@ import { useMediaDetails } from "@/hooks/useMediaDetails";
 
 export function DetailScreen() {
   const { mediaId } = useLocalSearchParams<{ mediaId: string }>();
-  const { colors } = useAppTheme();
+  const { colors, isDark } = useAppTheme();
   const { isSaved, toggleWatchlist } = useWatchlist();
   const { data: item, isLoading, error, reload } = useMediaDetails(mediaId);
-  const insets = useSafeAreaInsets();
-  const scrollY = useRef(new Animated.Value(0)).current;
   const styles = useMemo(
     () =>
       StyleSheet.create({
@@ -36,10 +34,10 @@ export function DetailScreen() {
           backgroundColor: colors.background,
         },
         heroFrame: {
-          backgroundColor: "#020617",
+          backgroundColor: "#0B0B0D",
         },
         heroImage: {
-          backgroundColor: "#020617",
+          backgroundColor: "#0B0B0D",
         },
         title: {
           color: "#FFF",
@@ -72,39 +70,12 @@ export function DetailScreen() {
         backButton: {
           backgroundColor: "rgba(3,8,20,0.68)",
         },
-        stickyHeader: {
-          position: "absolute",
-          left: 0,
-          right: 0,
-          top: 0,
-          zIndex: 10,
-          flexDirection: "row",
-          alignItems: "center",
-          gap: 12,
-          borderBottomWidth: 1,
-          backgroundColor: colors.background,
-          borderBottomColor: colors.border,
-          paddingTop: Math.max(insets.top, 0) + 12,
-          paddingBottom: 12,
-          paddingHorizontal: 16,
-        },
         heroBackButton: {
-          top: Math.max(insets.top, 0) + 16,
+          top: 16,
         },
       }),
-    [colors, insets.top]
+    [colors]
   );
-  const stickyOpacity = scrollY.interpolate({
-    inputRange: [10, 80],
-    outputRange: [0, 1],
-    extrapolate: "clamp",
-  });
-  const stickyTranslateY = scrollY.interpolate({
-    inputRange: [10, 80],
-    outputRange: [-12, 0],
-    extrapolate: "clamp",
-  });
-
   const handleBackPress = () => {
     if (router.canGoBack()) {
       router.back();
@@ -156,52 +127,28 @@ export function DetailScreen() {
   ];
 
   return (
-    <View className="flex-1" style={styles.scroll}>
-      <Animated.View
-        style={[
-          styles.stickyHeader,
-          {
-            opacity: stickyOpacity,
-            transform: [{ translateY: stickyTranslateY }],
-          },
-        ]}
-      >
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={appCopy.detail.back}
-          onPress={handleBackPress}
-          className="h-10 w-10 items-center justify-center rounded-full"
-          style={styles.card}
-        >
-          <MaterialCommunityIcons name="chevron-left" size={28} color={colors.text} />
-        </Pressable>
-        <View className="flex-1">
-          <Text className="text-xs font-bold uppercase" style={styles.mutedText}>
-            {item.type}
-          </Text>
-          <Text className="text-[17px] font-black" style={styles.sectionTitle} numberOfLines={1}>
-            {item.title}
-          </Text>
-        </View>
-      </Animated.View>
-
-      <Animated.ScrollView
+    <SafeAreaView edges={["top"]} className="flex-1" style={styles.scroll}>
+      <StatusBar
+        barStyle={isDark ? "light-content" : "dark-content"}
+        backgroundColor={colors.background}
+        translucent={false}
+        hidden={false}
+      />
+      <ScrollView
         className="flex-1"
         style={styles.scroll}
         contentContainerClassName="pb-9"
-        scrollEventThrottle={16}
-        onScroll={Animated.event(
-          [{ nativeEvent: { contentOffset: { y: scrollY } } }],
-          { useNativeDriver: Platform.OS !== "web" }
-        )}
       >
         <View className="h-[360px]" style={styles.heroFrame}>
           <Image
-            source={{ uri: item.backdropImage }}
-            className="h-full w-full"
-            style={styles.heroImage}
+            source={item.backdropImage}
+            placeholder={item.posterImage}
+            style={[StyleSheet.absoluteFill, styles.heroImage]}
             contentFit="cover"
+            placeholderContentFit="cover"
             contentPosition="center"
+            cachePolicy="memory-disk"
+            recyclingKey={`detail-${item.id}`}
           />
           <LinearGradient colors={["transparent", "rgba(3,8,20,0.95)"]} style={StyleSheet.absoluteFill} />
           <Pressable
@@ -223,7 +170,14 @@ export function DetailScreen() {
             <View className="mt-4 flex-row gap-3">
               <AppButton
                 title={appCopy.detail.play}
-                onPress={() => router.push({ pathname: "/video/[mediaId]", params: { mediaId: item.id } })}
+                onPress={() => {
+                  console.log("[video] play button pressed", {
+                    mediaId: item.id,
+                    title: item.title,
+                    videoUrl: item.videoUrl,
+                  });
+                  router.push({ pathname: "/video/[mediaId]", params: { mediaId: item.id } });
+                }}
                 className="px-[18px] py-[14px]"
                 textClassName="text-white"
                 style={styles.playButton}
@@ -294,7 +248,7 @@ export function DetailScreen() {
             <Text style={styles.bodyText}>{appCopy.detail.moreLikeThisBody}</Text>
           </SurfaceCard>
         </View>
-      </Animated.ScrollView>
-    </View>
+      </ScrollView>
+    </SafeAreaView>
   );
 }

@@ -14,6 +14,15 @@ export const appCopy = {
     emptyBody: "Pull to refresh and reload the catalog.",
     retry: "Retry",
   },
+  browse: {
+    back: "Go back",
+    loading: "Loading titles...",
+    errorTitle: "Titles unavailable",
+    errorBody: "We could not load this collection. Try again.",
+    retry: "Retry",
+    emptyTitle: "No titles found",
+    emptyBody: "This collection does not have any titles yet.",
+  },
   profile: {
     title: "Profile",
     account: "Account",
@@ -40,6 +49,10 @@ export const appCopy = {
   },
   watchlist: {
     title: "Watchlist",
+    subtitle: "Your saved stories, ready when you are",
+    savedLabel: "Saved for later",
+    browseTitle: "Keep discovering",
+    browseBody: "Save titles from Home and they will appear here across app refreshes.",
     loading: "Loading watchlist...",
     emptyTitle: "Nothing saved yet",
     emptyBody: "Add titles from Home to keep them here.",

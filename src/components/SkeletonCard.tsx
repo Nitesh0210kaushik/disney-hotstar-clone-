@@ -3,15 +3,20 @@ import { Animated, StyleSheet, View } from "react-native";
 
 import { useAppTheme } from "@/context/theme-context";
 
-export function SkeletonCard() {
+interface SkeletonCardProps {
+  width?: number;
+  height?: number;
+}
+
+export function SkeletonCard({ width = 150, height = 230 }: SkeletonCardProps) {
   const { colors } = useAppTheme();
   const shimmer = useRef(new Animated.Value(0)).current;
   const styles = useMemo(
     () =>
       StyleSheet.create({
         card: {
-          width: 150,
-          height: 230,
+          width,
+          height,
           borderRadius: 18,
           overflow: "hidden",
           backgroundColor: colors.surface,
@@ -29,7 +34,7 @@ export function SkeletonCard() {
           backgroundColor: "rgba(255,255,255,0.18)",
         },
       }),
-    [colors]
+    [colors, height, width]
   );
 
   useEffect(() => {

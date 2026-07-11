@@ -3,6 +3,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { fetchMediaPage } from "@/services/catalog";
 import { MediaItem } from "@/types";
 
+type FetchPage = (page: number, pageSize: number) => ReturnType<typeof fetchMediaPage>;
+
 interface PaginatedMediaState {
   items: MediaItem[];
   page: number;
@@ -12,7 +14,7 @@ interface PaginatedMediaState {
   hasMore: boolean;
 }
 
-export function usePaginatedMedia(pageSize = 4) {
+export function usePaginatedMedia(pageSize = 4, fetchPage: FetchPage = fetchMediaPage) {
   const loadingPageRef = useRef<string | null>(null);
   const [state, setState] = useState<PaginatedMediaState>({
     items: [],
@@ -41,7 +43,7 @@ export function usePaginatedMedia(pageSize = 4) {
       }));
 
       try {
-        const response = await fetchMediaPage(page, pageSize);
+        const response = await fetchPage(page, pageSize);
         setState((current) => ({
           items:
             mode === "replace"
@@ -71,7 +73,7 @@ export function usePaginatedMedia(pageSize = 4) {
         }
       }
     },
-    [pageSize]
+    [fetchPage, pageSize]
   );
 
   const refresh = useCallback(() => loadPage(1, "replace"), [loadPage]);

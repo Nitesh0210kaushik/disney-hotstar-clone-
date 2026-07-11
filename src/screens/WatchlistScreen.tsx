@@ -1,14 +1,23 @@
-import { RefreshControl, ScrollView, StyleSheet, Text, View } from "react-native";
-import { useMemo, useState } from "react";
-
+import { router } from "expo-router";
+import { useCallback, useMemo, useState } from "react";
+import {
+  FlatList,
+  ListRenderItem,
+  RefreshControl,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import { MediaCard } from "@/components/MediaCard";
 import { SkeletonBlock } from "@/components/SkeletonBlock";
 import { StateCard } from "@/components/StateCard";
 import { SurfaceCard } from "@/components/SurfaceCard";
 import { useAppTheme } from "@/context/theme-context";
 import { appCopy } from "@/data/copy";
 import { useWatchlistFeed } from "@/hooks/useWatchlistFeed";
+import { MediaItem } from "@/types";
 
 export function WatchlistScreen() {
   const { colors } = useAppTheme();
@@ -22,86 +31,118 @@ export function WatchlistScreen() {
           flex: 1,
           backgroundColor: colors.background,
         },
-        containerContent: {
+        content: {
           paddingHorizontal: 16,
-          paddingTop: insets.top + 16,
-          paddingBottom: 36,
+          paddingTop: 6,
+          paddingBottom: 96,
         },
         title: {
           color: colors.text,
         },
+        subtitle: {
+          color: colors.mutedText,
+        },
         card: {
           backgroundColor: colors.surface,
         },
-        message: {
-          color: colors.mutedText,
+        column: {
+          justifyContent: "space-between",
+          marginBottom: 14,
         },
       }),
-    [colors, insets.top]
+    [colors]
   );
-  const handleRefresh = async () => {
+
+  const handleRefresh = useCallback(async () => {
     setRefreshing(true);
     try {
       await reload();
-    } catch {
-      // Error state is rendered below.
     } finally {
       setRefreshing(false);
     }
-  };
+  }, [reload]);
+
+  const handlePressItem = useCallback((id: string) => {
+    router.push(`/detail/${id}`);
+  }, []);
+
+  const renderItem = useCallback<ListRenderItem<MediaItem>>(
+    ({ item }) => <MediaCard item={item} onPress={handlePressItem} />,
+    [handlePressItem]
+  );
+
+  if (isLoading) {
+    return (
+      <View className="flex-1 p-4" style={[styles.container, { paddingTop: insets.top + 12 }]}>
+        <Text className="text-[28px] font-black" style={styles.title}>
+          {appCopy.watchlist.title}
+        </Text>
+        <SurfaceCard className="mt-6" style={styles.card} contentClassName="gap-3 p-[18px]">
+          <SkeletonBlock width="42%" height={20} radius={8} />
+          <SkeletonBlock height={14} radius={8} />
+          <SkeletonBlock width="72%" height={14} radius={8} />
+        </SurfaceCard>
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View className="flex-1 justify-center p-4" style={styles.container}>
+        <StateCard
+          title={appCopy.watchlist.errorBody}
+          body={error}
+          actionTitle={appCopy.watchlist.retry}
+          onAction={() => void reload()}
+        />
+      </View>
+    );
+  }
+
+  const savedItems = items ?? [];
 
   return (
-    <ScrollView
-      className="flex-1"
+    <FlatList
+      data={savedItems}
+      keyExtractor={(item) => `watchlist-${item.id}`}
+      renderItem={renderItem}
+      numColumns={2}
+      columnWrapperStyle={styles.column}
       style={styles.container}
-      contentContainerStyle={styles.containerContent}
+      contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + 96 }]}
+      showsVerticalScrollIndicator={false}
+      initialNumToRender={4}
+      windowSize={5}
+      maxToRenderPerBatch={4}
+      removeClippedSubviews
       refreshControl={
         <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} tintColor={colors.accent} />
       }
-    >
-      <Text className="text-[28px] font-black" style={styles.title}>
-        {appCopy.watchlist.title}
-      </Text>
+      ListHeaderComponent={
+        <View>
+          <Text className="text-[28px] font-black" style={styles.title}>
+            {appCopy.watchlist.title}
+          </Text>
+          <Text className="mt-1 text-[13px]" style={styles.subtitle}>
+            {appCopy.watchlist.subtitle}
+          </Text>
 
-      {isLoading ? (
-        <SurfaceCard className="mt-6" style={styles.card} contentClassName="gap-3 p-[18px]">
-          <SkeletonBlock width="56%" height={18} radius={8} />
-          <SkeletonBlock height={14} radius={8} />
-          <SkeletonBlock width="70%" height={14} radius={8} />
-        </SurfaceCard>
-      ) : error ? (
-        <StateCard
-          className="mt-6"
-          title={error}
-          body={appCopy.watchlist.errorBody}
-          actionTitle={appCopy.watchlist.retry}
-          onAction={() => {
-            void reload();
-          }}
-        />
-      ) : (
-        <SurfaceCard className="mt-6" style={styles.card} contentClassName="p-[18px]">
-          {items?.length ? (
-          <>
-            <Text className="text-[18px] font-extrabold" style={styles.title}>
-              {items.length} {appCopy.watchlist.savedTitles}
+          <SurfaceCard className="mb-6 mt-5" style={styles.card} contentClassName="p-[18px]">
+            <Text className="text-[12px] font-bold uppercase" style={styles.subtitle}>
+              {appCopy.watchlist.savedLabel}
             </Text>
-            <Text className="mt-1" style={styles.message}>
-              {appCopy.watchlist.readyBody}
+            <Text className="mt-1 text-[26px] font-black" style={styles.title}>
+              {savedItems.length}
             </Text>
-          </>
-        ) : (
-          <>
-            <Text className="text-[18px] font-extrabold" style={styles.title}>
-              {appCopy.watchlist.emptyTitle}
+            <Text className="mt-1" style={styles.subtitle}>
+              {savedItems.length ? appCopy.watchlist.readyBody : appCopy.watchlist.browseBody}
             </Text>
-            <Text className="mt-1" style={styles.message}>
-              {appCopy.watchlist.emptyBody}
-            </Text>
-          </>
-          )}
-        </SurfaceCard>
-      )}
-    </ScrollView>
+          </SurfaceCard>
+        </View>
+      }
+      ListEmptyComponent={
+        <StateCard title={appCopy.watchlist.emptyTitle} body={appCopy.watchlist.emptyBody} />
+      }
+    />
   );
 }

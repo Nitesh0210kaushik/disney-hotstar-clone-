@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { Image } from "expo-image";
+const ExpoImage = Image as any;
 import { router } from "expo-router";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { Button as PaperButton, Card as PaperCard, Switch as PaperSwitch } from "react-native-paper";
@@ -26,7 +27,7 @@ export function ProfileScreen() {
         },
         content: {
           paddingBottom: Math.max(insets.bottom, 0) + 104,
-          paddingTop: insets.top + 16,
+          paddingTop: 6,
         },
         title: {
           color: colors.text,
@@ -82,7 +83,7 @@ export function ProfileScreen() {
           backgroundColor: colors.accentSoft,
         },
       }),
-    [colors, insets.bottom, insets.top]
+    [colors, insets.bottom]
   );
 
   return (
@@ -125,7 +126,7 @@ export function ProfileScreen() {
           <PaperCard.Content style={styles.paperContent}>
             <View className="absolute -right-10 -top-12 h-36 w-36 rounded-full opacity-70" style={styles.heroGlow} />
             <View className="flex-row items-start gap-3">
-              <Image
+              <ExpoImage
                 source={{ uri: profile?.avatar }}
                 className="h-[72px] w-[72px] rounded-[22px]"
                 style={styles.avatar}

@@ -10,7 +10,13 @@
     "ios": {
       "icon": "./assets/expo.icon"
     },
+    "androidStatusBar": {
+      "backgroundColor": "#F5F7FB",
+      "barStyle": "dark-content",
+      "translucent": false
+    },
     "android": {
+      "package": "com.niteshkaushik.disneyhotstarclone",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
@@ -29,7 +35,7 @@
       [
         "expo-splash-screen",
         {
-          "backgroundColor": "#208AEF",
+          "backgroundColor": "#F5F7FB",
           "image": "./assets/images/splash-icon.png",
           "imageWidth": 76
         }
@@ -38,6 +44,13 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "65341bc7-3cd5-4e85-b762-1c658f2da2fc"
+      }
+    },
+    "owner": "niteshkaushik0210"
   }
 }

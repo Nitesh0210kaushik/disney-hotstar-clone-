@@ -30,8 +30,9 @@ function AppShell() {
     <PaperProvider theme={paperTheme}>
       <StatusBar
         barStyle={isDark ? "light-content" : "dark-content"}
-        backgroundColor="transparent"
-        translucent={true}
+        backgroundColor={colors.background}
+        translucent={false}
+        hidden={false}
       />
       <View
         className="flex-1"

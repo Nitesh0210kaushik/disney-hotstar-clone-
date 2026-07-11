@@ -13,13 +13,20 @@ const playerStyle: CSSProperties = {
 };
 
 export function AppVideoPlayer({ uri }: AppVideoPlayerProps) {
+  console.log("[video:web] player rendered", { uri });
+
   return createElement("video", {
-    autoPlay: true,
+    autoPlay: false,
     controls: true,
-    muted: true,
+    muted: false,
     playsInline: true,
     preload: "auto",
     src: uri,
     style: playerStyle,
+    onLoadStart: () => console.log("[video:web] load started", { uri }),
+    onCanPlay: () => console.log("[video:web] can play", { uri }),
+    onPlay: () => console.log("[video:web] playback started", { uri }),
+    onError: (event: { currentTarget?: { error?: unknown } }) =>
+      console.error("[video:web] playback error", { uri, error: event.currentTarget?.error }),
   });
 }

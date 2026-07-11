@@ -11,12 +11,13 @@ interface MediaRailProps {
   subtitle?: string;
   items: MediaItem[];
   onPressItem: (id: string) => void;
+  onViewAll?: () => void;
 }
 
 const CARD_WIDTH = 160;
 const CARD_GAP = 14;
 
-function MediaRailComponent({ railId, title, subtitle, items, onPressItem }: MediaRailProps) {
+function MediaRailComponent({ railId, title, subtitle, items, onPressItem, onViewAll }: MediaRailProps) {
   const renderItem = useCallback<ListRenderItem<MediaItem>>(
     ({ item }) => <MediaCard item={item} onPress={onPressItem} />,
     [onPressItem]
@@ -37,7 +38,7 @@ function MediaRailComponent({ railId, title, subtitle, items, onPressItem }: Med
 
   return (
     <View className="mb-7">
-      <SectionHeader title={title} subtitle={subtitle} />
+      <SectionHeader title={title} subtitle={subtitle} onViewAll={onViewAll} />
       <FlatList
         data={items}
         horizontal
